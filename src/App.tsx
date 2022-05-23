@@ -1,45 +1,64 @@
-import { useState } from 'react'
-import logo from './logo.svg'
-import './App.css'
+import { useMemo, useState } from "react";
+import {
+    ColorScheme,
+    ColorSchemeProvider,
+    Container,
+    MantineProvider,
+} from "@mantine/core";
+import DataTable, { ColumnOptions } from "./components/DataTable";
+import { faker } from "@faker-js/faker";
+
+interface Data {
+    name: string;
+    city: string;
+    country: string;
+    company: string;
+    value: number;
+    date: Date;
+}
+const fakes: Data[] = new Array(100).fill({}).map((i) => ({
+    name: faker.name.findName(),
+    city: faker.address.city(),
+    country: faker.address.country(),
+    company: faker.company.companyName(),
+    value: faker.datatype.number(),
+    date: faker.datatype.datetime(),
+}));
 
 function App() {
-  const [count, setCount] = useState(0)
+    const [count, setCount] = useState(0);
+    const [colorScheme, setColorScheme] = useState<ColorScheme>("dark");
+    const data = useMemo(() => fakes, []);
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>Hello Vite + React!</p>
-        <p>
-          <button type="button" onClick={() => setCount((count) => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-        <p>
-          Edit <code>App.tsx</code> and save to test HMR updates.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          {' | '}
-          <a
-            className="App-link"
-            href="https://vitejs.dev/guide/features.html"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Vite Docs
-          </a>
-        </p>
-      </header>
-    </div>
-  )
+    const columns: ColumnOptions<Data>[] = useMemo(
+        () => [
+            { label: "Name", key: "name" },
+            { label: "City", key: "city" },
+            { label: "Country", key: "country" },
+            { label: "Company", key: "company" },
+            { label: "Value", key: "value" },
+            { label: "Date", key: "date" },
+        ],
+        []
+    );
+
+    const toggleColorScheme = (value?: ColorScheme) => {
+        setColorScheme(value ?? colorScheme === "dark" ? "light" : "dark");
+    };
+    return (
+        <ColorSchemeProvider
+            colorScheme={colorScheme}
+            toggleColorScheme={toggleColorScheme}>
+            <MantineProvider
+                theme={{ colorScheme }}
+                withGlobalStyles
+                withNormalizeCSS>
+                <Container>
+                    <DataTable data={data} columns={columns} />
+                </Container>
+            </MantineProvider>
+        </ColorSchemeProvider>
+    );
 }
 
-export default App
+export default App;
